@@ -146,7 +146,7 @@ export default function GroupTasksScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.header}>{groupName} Tasks</Text>
+        <Text style={styles.header}>{groupName}</Text>
         <TouchableOpacity 
           style={styles.membersButton}
           onPress={() => setIsMembersModalVisible(true)}
@@ -263,6 +263,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 20,
     textAlign: 'center',
+    right: 70,
+    top: 5,
     color: '#1976D2',  // Consistent blue color for titles
   },
   taskContainer: {
@@ -368,7 +370,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E1F5FE',
     padding: 12,
     borderRadius: 25,
-    marginBottom: 20,
+    marginBottom: 10,
     alignItems: 'center',
   },
   modalButtonContainer: {
@@ -400,13 +402,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   membersButton: {
-    backgroundColor: '#3E8037',  // Green color for the button
-    paddingVertical: 10,          // Vertical padding (increased to make it taller)
-    paddingHorizontal: 15,        
-    borderRadius: 8,              
+    backgroundColor: '#CCCCCC', // Light gray color
+    paddingVertical: 10,       // Vertical padding
+    paddingHorizontal: 15,     // Horizontal padding
+    borderRadius: 8,           // Rounded corners
     position: 'absolute',
-    top: 10,
-    right: 20,
+    right: 20,                 // Positioned to the right
   },
   membersButtonText: {
     color: 'white',

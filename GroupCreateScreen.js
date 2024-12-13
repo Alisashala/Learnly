@@ -84,7 +84,6 @@ export default function GroupCreateScreen({ navigation }) {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Group Created Successfully!</Text>
             <View style={styles.groupIdContainer}>
-              <Text style={styles.groupIdLabel}>Group ID:</Text>
               <Text style={styles.groupIdText}>{createdGroupId}</Text>
               <TouchableOpacity 
                 style={styles.copyButton} 
@@ -183,12 +182,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
+    marginLeft: 20,
+    marginRight: 20,
     marginBottom: 15,
   },
-  groupIdLabel: {
-    fontSize: 16,
-    marginRight: 10,
-  },
+  
   groupIdText: {
     fontSize: 18,
     fontWeight: "bold",
