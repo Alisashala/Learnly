@@ -43,7 +43,14 @@ export default function GroupTasksScreen({ route, navigation }) {
       
       if (groupDoc.exists()) {
         const groupData = groupDoc.data();
-        setTasks(groupData.tasks || []);
+        
+        // Parse tasks and convert Timestamp to Date
+        const parsedTasks = (groupData.tasks || []).map((task) => ({
+          ...task,
+          deadline: task.deadline ? new Date(task.deadline.seconds * 1000) : null, // Convert Firestore Timestamp to Date
+        }));
+  
+        setTasks(parsedTasks);
         setGroupMembers(groupData.members || []);
         setGroupName(groupData.name || "Group");
       }
@@ -52,7 +59,7 @@ export default function GroupTasksScreen({ route, navigation }) {
       alert("Failed to fetch group information");
     }
   };
-
+  
   const addTask = async () => {
     if (!newTask.trim()) {
       alert("Please enter a task");
