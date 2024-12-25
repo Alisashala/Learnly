@@ -43,12 +43,24 @@ export default function GroupTasksScreen({ route, navigation }) {
       
       if (groupDoc.exists()) {
         const groupData = groupDoc.data();
-        
+  
         // Parse tasks and convert Timestamp to Date
         const parsedTasks = (groupData.tasks || []).map((task) => ({
           ...task,
-          deadline: task.deadline ? new Date(task.deadline.seconds * 1000) : null, // Convert Firestore Timestamp to Date
+          deadline: task.deadline ? new Date(task.deadline.seconds * 1000) : null, // Convert Timestamp to Date
         }));
+  
+        // Sort: Unfinished tasks first, then by deadline
+        parsedTasks.sort((a, b) => {
+          if (a.completed === b.completed) {
+            // Both are unfinished or finished, sort by deadline
+            if (a.deadline && b.deadline) return a.deadline - b.deadline;
+            if (a.deadline) return -1; // If only `a` has a deadline, it comes first
+            if (b.deadline) return 1;  // If only `b` has a deadline, it comes first
+            return 0;                  // No deadlines, maintain order
+          }
+          return a.completed - b.completed; // Unfinished (false = 0) before finished (true = 1)
+        });
   
         setTasks(parsedTasks);
         setGroupMembers(groupData.members || []);
@@ -59,7 +71,7 @@ export default function GroupTasksScreen({ route, navigation }) {
       alert("Failed to fetch group information");
     }
   };
-  
+
   const addTask = async () => {
     if (!newTask.trim()) {
       alert("Please enter a task");
@@ -94,36 +106,29 @@ export default function GroupTasksScreen({ route, navigation }) {
   const toggleTaskCompletion = async (taskToToggle) => {
     try {
       const groupRef = doc(db, "groups", groupId);
-      
+  
       // Remove the old task
       await updateDoc(groupRef, {
-        tasks: arrayRemove(taskToToggle)
+        tasks: arrayRemove(taskToToggle),
       });
-
-      // Add the updated task
+  
+      // Add the updated task with toggled `completed` status
       const updatedTask = {
         ...taskToToggle,
-        completed: !taskToToggle.completed
+        completed: !taskToToggle.completed,
       };
-
+  
       await updateDoc(groupRef, {
-        tasks: arrayUnion(updatedTask)
+        tasks: arrayUnion(updatedTask),
       });
-
-      // Update local state
-      setTasks(prevTasks => 
-        prevTasks.map(task => 
-          task.id === taskToToggle.id 
-            ? { ...task, completed: !task.completed } 
-            : task
-        )
-      );
+  
+      // Re-fetch and re-sort tasks
+      fetchGroupData();
     } catch (error) {
       console.error("Error toggling task:", error);
       alert("Failed to update task");
     }
   };
-
   const onDeadlineChange = (event, selectedDate) => {
     const currentDate = selectedDate || deadline;
     setShowDatePicker(false);
@@ -164,13 +169,12 @@ export default function GroupTasksScreen({ route, navigation }) {
       </View>
       
       <FlatList
-        data={tasks}
-        renderItem={renderTask}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={
-          <Text style={styles.emptyListText}>No tasks yet. Add a task!</Text>
-        }
-      />
+  data={tasks}
+  keyExtractor={(item) => item.id}
+  renderItem={renderTask}
+  ListEmptyComponent={<Text>No tasks yet. Add a task!</Text>}
+/>
+
 
       <TouchableOpacity 
         style={styles.addButton}
