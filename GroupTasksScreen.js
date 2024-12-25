@@ -9,6 +9,7 @@ import {
   Modal,
   ScrollView 
 } from "react-native";
+import * as Clipboard from 'expo-clipboard';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { db, auth } from './firebaseConfig';
 import { 
@@ -173,30 +174,46 @@ export default function GroupTasksScreen({ route, navigation }) {
 
       {/* Members Modal */}
       <Modal
-        visible={isMembersModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsMembersModalVisible(false)}
+  visible={isMembersModalVisible}
+  transparent={true}
+  animationType="slide"
+  onRequestClose={() => setIsMembersModalVisible(false)}
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.membersModalContent}>
+      {/* Existing Modal Design */}
+      <Text style={styles.membersModalTitle}>Group Information</Text>
+      
+      {/* Display Group ID */}
+      <Text style={styles.groupIdText}>Group ID: {groupId}</Text>
+      <TouchableOpacity 
+        style={styles.copyButton} 
+        onPress={() => {
+          Clipboard.setStringAsync(groupId);
+          alert("Group ID copied to clipboard!");
+        }}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.membersModalContent}>
-            <Text style={styles.membersModalTitle}>Group Members</Text>
-            <ScrollView>
-              {groupMembers.map((member, index) => (
-                <View key={index} style={styles.memberItem}>
-                  <Text style={styles.memberText}>👤 {member}</Text>
-                </View>
-              ))}
-            </ScrollView>
-            <TouchableOpacity 
-              style={styles.closeModalButton}
-              onPress={() => setIsMembersModalVisible(false)}
-            >
-              <Text style={styles.closeModalButtonText}>Close</Text>
-            </TouchableOpacity>
+        <Text style={styles.copyButtonText}>Copy Group ID</Text>
+      </TouchableOpacity>
+
+      {/* Members List */}
+      <ScrollView>
+        {groupMembers.map((member, index) => (
+          <View key={index} style={styles.memberItem}>
+            <Text style={styles.memberText}>👤 {member}</Text>
           </View>
-        </View>
-      </Modal>
+        ))}
+      </ScrollView>
+
+      <TouchableOpacity 
+        style={styles.closeModalButton} 
+        onPress={() => setIsMembersModalVisible(false)}
+      >
+        <Text style={styles.closeModalButtonText}>Close</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
 
       {/* Add Task Modal */}
       <Modal
@@ -444,5 +461,27 @@ const styles = StyleSheet.create({
   closeModalButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+
+  groupIdText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1976D2",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+
+  copyButton: {
+    backgroundColor: "#1976D2",
+    padding: 8,
+    borderRadius: 5,
+    marginBottom: 15,
+    alignItems: "center",
+  },
+
+  copyButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });
