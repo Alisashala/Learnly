@@ -74,10 +74,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   joinButton: {
-    backgroundColor: "#1976D2",  // Consistent blue button color
-    padding: 15,
-    borderRadius: 25,
+    backgroundColor: "#1976D2",
+    padding: 10, // Reduced padding
+    borderRadius: 20, // Reduced border radius
     alignItems: "center",
+    marginBottom: 15, // Slightly reduced margin
+    marginLeft: 70,
+    marginRight: 70,
   },
   joinButtonText: {
     color: "#fff",

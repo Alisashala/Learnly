@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useLayoutEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons"; // For icons
 import { auth, db } from './firebaseConfig';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { signOut } from "firebase/auth";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function GroupScreen({ navigation }) {
   const [groups, setGroups] = useState([]);
@@ -10,8 +12,12 @@ export default function GroupScreen({ navigation }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+        <TouchableOpacity 
+          style={styles.logoutButton} 
+          onPress={handleLogout}
+          activeOpacity={0.7}  // Adds a nice press effect
+        >
+          <AntDesign name="logout" size={24} color="#FF3B30" />
         </TouchableOpacity>
       ),
     });
@@ -73,18 +79,18 @@ export default function GroupScreen({ navigation }) {
 
       {/* Button to navigate to CreateGroupScreen */}
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.roundButton, { bottom: 120 }]} // Positioned one above the other
         onPress={() => navigation.navigate("CreateGroupScreen")}
       >
-        <Text style={styles.buttonText}>Create a New Group</Text>
+        <Icon name="add" size={30} color="#fff" />
       </TouchableOpacity>
 
       {/* Button to navigate to JoinGroupScreen */}
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.roundButton, { bottom: 50 }]} // Positioned below the Create button
         onPress={() => navigation.navigate("JoinGroupScreen")}
       >
-        <Text style={styles.buttonText}>Join an Existing Group</Text>
+        <Icon name="group" size={30} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -96,12 +102,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#F4F6F8",  // Consistent clean light gray background
+    backgroundColor: "#F4F6F8", // Consistent clean light gray background
   },
   header: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#1E88E5",  // Blue header for consistency
+    color: "#1E88E5", // Blue header for consistency
     marginBottom: 20,
   },
   groupList: {
@@ -109,7 +115,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   groupItem: {
-    backgroundColor: "#E3F2FD",  // Light blue for group items
+    backgroundColor: "#E3F2FD", // Light blue for group items
     padding: 15,
     borderRadius: 12,
     marginBottom: 10,
@@ -118,36 +124,47 @@ const styles = StyleSheet.create({
   groupName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#1E88E5",  // Strong blue for group names
+    color: "#1E88E5", // Strong blue for group names
   },
   groupDescription: {
     fontSize: 14,
-    color: "#5E6472",  // Subtle gray for descriptions
+    color: "#5E6472", // Subtle gray for descriptions
   },
   noGroupsText: {
     fontSize: 16,
     color: "#666",
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: "#1976D2",  // Darker blue for action buttons
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
-    width: "100%",
+  roundButton: {
+    position: "absolute",
+    left: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#1976D2", // Darker blue for buttons
+    justifyContent: "center",
     alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    elevation: 5, // Shadow for Android
+    shadowColor: "#000", // Shadow for iOS
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
   },
   logoutButton: {
-    marginRight: 15,
+    marginRight: 20,
+    padding: 4,
+    bottom: 5,
+    right: 10,
+    borderRadius: 50,  // Makes it circular
+    backgroundColor: 'white',  // Light grey background
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 3,
+      height: 3,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,  // Android shadow
   },
-  logoutText: {
-    color: "#FF6347",  // Keeping logout red for clarity
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+ 
 });

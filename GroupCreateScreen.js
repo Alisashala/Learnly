@@ -148,10 +148,12 @@ const styles = StyleSheet.create({
   },
   createButton: {
     backgroundColor: "#1976D2",
-    padding: 15,
-    borderRadius: 25,
-    alignItems: "center",
-    marginBottom: 20,
+padding: 10, // Reduced padding
+borderRadius: 20, // Reduced border radius
+alignItems: "center",
+marginBottom: 15, // Slightly reduced margin
+marginLeft: 70,
+marginRight: 70,
   },
   createButtonText: {
     color: "#fff",

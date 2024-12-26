@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { auth } from './firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
@@ -50,8 +50,10 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Welcome to Learnly</Text>
-      <Text style={styles.subheader}>Simplify your study life with organized plans and collaboration tools.</Text>
+      <Image source={require('./assets/Learnly.png')} style={styles.logo} />
+
+      <Text style={styles.header}>Simplify Study Collaboration</Text>
+      
 
       <TextInput
         placeholder="Email"
@@ -69,13 +71,14 @@ export default function LoginScreen({ navigation }) {
         placeholderTextColor="#AAB6C1"
       />
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+<View style={styles.buttonContainer}>
+  <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+    <Text style={{ color: "white" }}>Login</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
+    <Text style={{ color: "white" }}>Sign Up</Text>
+  </TouchableOpacity>
+</View>
     </View>
   );
 }
@@ -86,49 +89,58 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#F4F6F8", // Light gray background for a clean look
+    backgroundColor: "#F4F6F8",
+  },
+  logo: {
+    width: 250, 
+    height: 250, 
+    marginBottom: 20, 
   },
   header: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#1E88E5", // Strong blue for the header
+    fontSize: 18,
+    fontStyle: "italic",
+    color: "#0c334a",
     marginBottom: 10,
   },
-  subheader: {
-    fontSize: 14,
-    color: "#5E6472",
-    marginBottom: 20,
-    textAlign: "center",
-    paddingHorizontal: 10,
-  },
+
   input: {
     width: "100%",
     padding: 14,
     marginBottom: 15,
     borderWidth: 1,
     borderRadius: 8,
-    borderColor: "#90CAF9", // Soft blue for input borders
+    borderColor: "#90CAF9",
     backgroundColor: "#fff",
     color: "#333",
   },
-  loginButton: {
-    width: "100%",
-    backgroundColor: "#1E88E5", // Professional blue for the login button
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  signupButton: {
-    width: "100%",
-    backgroundColor: "#42A5F5", // Lighter blue for the sign-up button
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
+  
+buttonContainer: {
+  flexDirection: "row", 
+  justifyContent: "space-between", 
+  alignItems: "center", 
+  marginVertical: 10, 
+},
+
+loginButton: {
+  width: "30%",
+  backgroundColor: "#1E88E5",
+  padding: 12,
+  borderRadius: 8,
+  alignItems: "center",
+  marginRight: 10, 
+},
+signupButton: {
+  width: "30%",
+  backgroundColor: "#42A5F5",
+  padding: 12,
+  borderRadius: 8,
+  alignItems: "center",
+},
+
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
+
 });

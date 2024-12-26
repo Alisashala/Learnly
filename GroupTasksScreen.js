@@ -12,6 +12,7 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { db, auth } from './firebaseConfig';
+import { Ionicons } from '@expo/vector-icons';
 import { 
   doc, 
   getDoc, 
@@ -43,24 +44,12 @@ export default function GroupTasksScreen({ route, navigation }) {
       
       if (groupDoc.exists()) {
         const groupData = groupDoc.data();
-  
+        
         // Parse tasks and convert Timestamp to Date
         const parsedTasks = (groupData.tasks || []).map((task) => ({
           ...task,
-          deadline: task.deadline ? new Date(task.deadline.seconds * 1000) : null, // Convert Timestamp to Date
+          deadline: task.deadline ? new Date(task.deadline.seconds * 1000) : null, // Convert Firestore Timestamp to Date
         }));
-  
-        // Sort: Unfinished tasks first, then by deadline
-        parsedTasks.sort((a, b) => {
-          if (a.completed === b.completed) {
-            // Both are unfinished or finished, sort by deadline
-            if (a.deadline && b.deadline) return a.deadline - b.deadline;
-            if (a.deadline) return -1; // If only `a` has a deadline, it comes first
-            if (b.deadline) return 1;  // If only `b` has a deadline, it comes first
-            return 0;                  // No deadlines, maintain order
-          }
-          return a.completed - b.completed; // Unfinished (false = 0) before finished (true = 1)
-        });
   
         setTasks(parsedTasks);
         setGroupMembers(groupData.members || []);
@@ -71,7 +60,7 @@ export default function GroupTasksScreen({ route, navigation }) {
       alert("Failed to fetch group information");
     }
   };
-
+  
   const addTask = async () => {
     if (!newTask.trim()) {
       alert("Please enter a task");
@@ -106,29 +95,36 @@ export default function GroupTasksScreen({ route, navigation }) {
   const toggleTaskCompletion = async (taskToToggle) => {
     try {
       const groupRef = doc(db, "groups", groupId);
-  
+      
       // Remove the old task
       await updateDoc(groupRef, {
-        tasks: arrayRemove(taskToToggle),
+        tasks: arrayRemove(taskToToggle)
       });
-  
-      // Add the updated task with toggled `completed` status
+
+      // Add the updated task
       const updatedTask = {
         ...taskToToggle,
-        completed: !taskToToggle.completed,
+        completed: !taskToToggle.completed
       };
-  
+
       await updateDoc(groupRef, {
-        tasks: arrayUnion(updatedTask),
+        tasks: arrayUnion(updatedTask)
       });
-  
-      // Re-fetch and re-sort tasks
-      fetchGroupData();
+
+      // Update local state
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.id === taskToToggle.id 
+            ? { ...task, completed: !task.completed } 
+            : task
+        )
+      );
     } catch (error) {
       console.error("Error toggling task:", error);
       alert("Failed to update task");
     }
   };
+
   const onDeadlineChange = (event, selectedDate) => {
     const currentDate = selectedDate || deadline;
     setShowDatePicker(false);
@@ -160,30 +156,30 @@ export default function GroupTasksScreen({ route, navigation }) {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.header}>{groupName}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.membersButton}
           onPress={() => setIsMembersModalVisible(true)}
         >
-          <Text style={styles.membersButtonText}>👥 Members</Text>
+          <Text style={styles.membersButtonText}>👥</Text>
         </TouchableOpacity>
       </View>
-      
+  
       <FlatList
-  data={tasks}
-  keyExtractor={(item) => item.id}
-  renderItem={renderTask}
-  ListEmptyComponent={<Text>No tasks yet. Add a task!</Text>}
-/>
-
-
-      <TouchableOpacity 
+        data={tasks}
+        renderItem={renderTask}
+        keyExtractor={(item) => item.id}
+        ListEmptyComponent={
+          <Text style={styles.emptyListText}>No tasks yet. Add a task!</Text>
+        }
+      />
+  
+      <TouchableOpacity
         style={styles.addButton}
         onPress={() => setIsAddTaskModalVisible(true)}
       >
         <Text style={styles.addButtonText}>+ Add Task</Text>
       </TouchableOpacity>
-
-      {/* Members Modal */}
+  
       <Modal
   visible={isMembersModalVisible}
   transparent={true}
@@ -192,41 +188,40 @@ export default function GroupTasksScreen({ route, navigation }) {
 >
   <View style={styles.modalContainer}>
     <View style={styles.membersModalContent}>
-      {/* Existing Modal Design */}
-      <Text style={styles.membersModalTitle}>Group Information</Text>
-      
-      {/* Display Group ID */}
-      <Text style={styles.groupIdText}>Group ID: {groupId}</Text>
-      <TouchableOpacity 
-        style={styles.copyButton} 
-        onPress={() => {
-          Clipboard.setStringAsync(groupId);
-          alert("Group ID copied to clipboard!");
-        }}
-      >
-        <Text style={styles.copyButtonText}>Copy Group ID</Text>
-      </TouchableOpacity>
+      <Text style={styles.membersModalTitle}>Group ID</Text>
+      <View style={styles.groupIdContainer}>
+        <Text style={styles.groupIdText}>{groupId}</Text>
+        <TouchableOpacity
+          style={styles.copyIcon}
+          onPress={() => {
+            Clipboard.setStringAsync(groupId);
+            alert("Group ID copied to clipboard!");
+          }}
+        >
+          <Ionicons name="copy-outline" size={24} color="#1976D2" />
+        </TouchableOpacity>
+      </View>
 
-      {/* Members List */}
       <ScrollView>
+      <Text style={styles.groupmembersModalTitle}>Group Members</Text>
         {groupMembers.map((member, index) => (
           <View key={index} style={styles.memberItem}>
+           
             <Text style={styles.memberText}>👤 {member}</Text>
           </View>
         ))}
       </ScrollView>
 
-      <TouchableOpacity 
-        style={styles.closeModalButton} 
+      <TouchableOpacity
+        style={styles.xButton}
         onPress={() => setIsMembersModalVisible(false)}
       >
-        <Text style={styles.closeModalButtonText}>Close</Text>
+        <Text style={styles.xButtonText}>×</Text>
       </TouchableOpacity>
     </View>
   </View>
 </Modal>
 
-      {/* Add Task Modal */}
       <Modal
         visible={isAddTaskModalVisible}
         transparent={true}
@@ -241,15 +236,13 @@ export default function GroupTasksScreen({ route, navigation }) {
               onChangeText={setNewTask}
               placeholder="Enter task description"
             />
-            
-            {/* Deadline selection */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.deadlineButton}
               onPress={() => setShowDatePicker(true)}
             >
               <Text>Select Deadline: {deadline.toLocaleDateString()}</Text>
             </TouchableOpacity>
-
+  
             {showDatePicker && (
               <DateTimePicker
                 value={deadline}
@@ -258,15 +251,15 @@ export default function GroupTasksScreen({ route, navigation }) {
                 onChange={onDeadlineChange}
               />
             )}
-
+  
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.modalButton}
                 onPress={addTask}
               >
                 <Text style={styles.modalButtonText}>Add Task</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={() => setIsAddTaskModalVisible(false)}
               >
@@ -278,6 +271,7 @@ export default function GroupTasksScreen({ route, navigation }) {
       </Modal>
     </View>
   );
+  
 }
 
 const styles = StyleSheet.create({
@@ -291,7 +285,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 20,
     textAlign: 'center',
-    right: 70,
+    
     top: 5,
     color: '#1976D2',  // Consistent blue color for titles
   },
@@ -430,17 +424,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   membersButton: {
-    backgroundColor: '#CCCCCC', // Light gray color
-    paddingVertical: 10,       // Vertical padding
-    paddingHorizontal: 15,     // Horizontal padding
-    borderRadius: 8,           // Rounded corners
+    backgroundColor: 'white',  // Blue background to match your theme
+    padding: 8,
+    paddingBottom: 10,
+    borderRadius: 50,           // Circular button
     position: 'absolute',
-    right: 20,                 // Positioned to the right
+    right: 20,  
+    bottom: 10,
+    shadowColor: "#000",        // Add shadow for depth
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,              // Android shadow
   },
   membersButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 30,
   },
   membersModalContent: {
     width: '80%',
@@ -452,15 +455,27 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 5,
   },
-  memberItem: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-  },
+  
   memberText: {
     fontSize: 18,
+    fontWeight: '500',
+    color: '#2C3E50',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 0.1,
+    elevation: 2,
+    
   },
   closeModalButton: {
     marginTop: 20,
@@ -469,30 +484,62 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
   },
-  closeModalButtonText: {
-    color: 'white',
+  xButton: {
+    position: 'absolute',
+    right: 15,
+    top: 10,
+    zIndex: 1,
+    padding: 3,
+  },
+  xButtonText: {
+    color: '#A9A9A9',
+    fontSize: 28,
     fontWeight: 'bold',
   },
 
   groupIdText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    backgroundColor: '#E3F2FD',
+    padding: 15,
+    marginVertical: 15,
+    textAlign: 'center',
+    borderRadius: 10,
+    overflow: 'hidden',
+    shadowColor: '#1976D2',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#BBDEFB',
+  },
+
+  groupIdContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  groupIdText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#1976D2",
-    marginVertical: 10,
-    textAlign: "center",
+    marginRight: 10,
   },
 
-  copyButton: {
-    backgroundColor: "#1976D2",
+  copyIcon: {
     padding: 8,
-    borderRadius: 5,
-    marginBottom: 15,
-    alignItems: "center",
   },
 
-  copyButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-});
+  groupmembersModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  }
+
+
+}); 
