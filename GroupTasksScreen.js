@@ -10,6 +10,7 @@ import {
   ScrollView 
 } from "react-native";
 import * as Clipboard from 'expo-clipboard';
+import { Keyboard } from 'react-native';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { db, auth } from './firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
@@ -186,7 +187,7 @@ export default function GroupTasksScreen({ route, navigation }) {
   animationType="slide"
   onRequestClose={() => setIsMembersModalVisible(false)}
 >
-  <View style={styles.modalContainer}>
+  <View style={styles.modalContainerMember}>
     <View style={styles.membersModalContent}>
       <Text style={styles.membersModalTitle}>Group ID</Text>
       <View style={styles.groupIdContainer}>
@@ -222,53 +223,79 @@ export default function GroupTasksScreen({ route, navigation }) {
   </View>
 </Modal>
 
-      <Modal
-        visible={isAddTaskModalVisible}
-        transparent={true}
-        animationType="slide"
+<Modal
+  visible={isAddTaskModalVisible}
+  transparent={true}
+  animationType="slide"
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.modalContent}>
+      <TouchableOpacity
+        style={styles.modalCloseButton}
+        onPress={() => setIsAddTaskModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add New Task</Text>
-            <TextInput
-              style={styles.input}
-              value={newTask}
-              onChangeText={setNewTask}
-              placeholder="Enter task description"
-            />
-            <TouchableOpacity
-              style={styles.deadlineButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text>Select Deadline: {deadline.toLocaleDateString()}</Text>
-            </TouchableOpacity>
-  
-            {showDatePicker && (
-              <DateTimePicker
-                value={deadline}
-                mode="date"
-                display="default"
-                onChange={onDeadlineChange}
-              />
-            )}
-  
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={addTask}
-              >
-                <Text style={styles.modalButtonText}>Add Task</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setIsAddTaskModalVisible(false)}
-              >
-                <Text style={styles.modalCancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        <Text style={styles.modalCloseButtonText}>×</Text>
+      </TouchableOpacity>
+      
+      <Text style={styles.modalTitle}>Create New Task</Text>
+      
+      <View style={styles.inputContainer}>
+        <Text style={styles.inputLabel}>Task Description</Text>
+        <TextInput
+  style={styles.taskInput}
+  value={newTask}
+  onChangeText={setNewTask}
+  placeholder="What needs to be done?"
+  placeholderTextColor="#A0A0A0"
+  multiline={true}
+  maxLength={100}
+  returnKeyType="done"
+  blurOnSubmit={true}
+  onSubmitEditing={() => Keyboard.dismiss()}
+/>
+      </View>
+
+      <View style={styles.deadlineContainer}>
+        <Text style={styles.inputLabel}>Deadline</Text>
+        <TouchableOpacity
+          style={styles.datePickerButton}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Ionicons name="calendar-outline" size={24} color="#1976D2" style={styles.calendarIcon} />
+          <Text style={styles.dateText}>{deadline.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {showDatePicker && (
+        <View style={styles.datePickerContainer}>
+          <DateTimePicker
+            value={deadline}
+            mode="date"
+            display="inline"
+            onChange={onDeadlineChange}
+            minimumDate={new Date()}
+            style={styles.datePicker}
+          />
         </View>
-      </Modal>
+      )}
+
+      <View style={styles.modalButtonContainer}>
+        <TouchableOpacity
+          style={[styles.modalButton, !newTask.trim() && styles.modalButtonDisabled]}
+          onPress={addTask}
+          disabled={!newTask.trim()}
+        >
+          <Text style={styles.modalButtonText}>Create Task</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
     </View>
   );
   
@@ -360,68 +387,122 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
-  modalContainer: {
+  modalContainerMember: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center', // Changed from 'flex-end' to 'center'
+    alignItems: 'center', // Added to center horizontally
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
   modalContent: {
-    width: '85%',
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 25, // Changed to have uniform border radius
+    padding: 24,
+    width: '90%', // Added to control modal width
+    maxHeight: '80%', // Adjusted from 90% to 80%
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+    zIndex: 1,
+    padding: 5,
+  },
+  modalCloseButtonText: {
+    fontSize: 28,
+    color: '#666',
+    fontWeight: '300',
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
     color: '#1976D2',
+    marginBottom: 24,
+    marginTop: 10,
+    textAlign: 'center',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#1976D2',
-    padding: 14,
-    borderRadius: 25,
+  inputContainer: {
     marginBottom: 20,
-    fontSize: 16,
-    color: '#444',
   },
-  deadlineButton: {
-    backgroundColor: '#E1F5FE',
-    padding: 12,
-    borderRadius: 25,
-    marginBottom: 10,
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#555',
+    marginBottom: 8,
+  },
+  taskInput: {
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: '#333',
+    backgroundColor: '#F8F9FA',
+    minHeight: 50,
+    textAlignVertical: 'top',
+  },
+  deadlineContainer: {
+    marginBottom: 20,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#F0F7FF',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
+  },
+  calendarIcon: {
+    marginRight: 12,
+  },
+  dateText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  datePickerContainer: {
+    backgroundColor: '#fff',
+    alignSelf: 'center',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 20,
+    
+  },
+  datePicker: {
+    backgroundColor: '#1976D2',
+    height: 300,
   },
   modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginTop: 10,
   },
   modalButton: {
-    flex: 1,
     backgroundColor: '#1976D2',
-    padding: 15,
-    borderRadius: 25,
-    marginRight: 10,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  modalButtonDisabled: {
+    backgroundColor: '#B0BEC5',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   modalButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  modalCancelButton: {
-    flex: 1,
-    backgroundColor: '#CCCCCC',
-    padding: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-  },
-  modalCancelButtonText: {
-    color: 'white',
-    fontSize: 16,
+    fontWeight: '600',
   },
   membersButton: {
     backgroundColor: 'white',  // Blue background to match your theme
@@ -542,4 +623,4 @@ const styles = StyleSheet.create({
   }
 
 
-}); 
+});
