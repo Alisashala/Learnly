@@ -280,6 +280,7 @@ export default function GroupTasksScreen({ route, navigation }) {
             onChange={onDeadlineChange}
             minimumDate={new Date()}
             style={styles.datePicker}
+            color="white"
           />
         </View>
       )}
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
     borderRadius: 25, // Changed to have uniform border radius
     padding: 24,
     width: '90%', // Added to control modal width
-    maxHeight: '80%', // Adjusted from 90% to 80%
+    maxHeight: '100%', // Adjusted from 90% to 80%
   },
   modalCloseButton: {
     position: 'absolute',
@@ -474,8 +475,9 @@ const styles = StyleSheet.create({
     
   },
   datePicker: {
-    backgroundColor: '#1976D2',
+    backgroundColor: 'white',
     height: 300,
+    color: 'white',
   },
   modalButtonContainer: {
     marginTop: 10,
