@@ -3,19 +3,23 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "reac
 import { auth } from './firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
+
 export default function LoginScreen({ navigation }) {
+  // States til at gemme brugerens e-mailadresse og kode
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // Funktion til at håndtere login
   const handleLogin = () => {
-    if (!email || !password) {
+    if (!email || !password) { // Validerer, at begge felter er udfyldt
       alert("Please enter both email and password.");
       return;
     }
 
+    // Firebase-funktion til at logge brugeren ind med e-mail og adgangskode
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        navigation.replace("Home");
+        navigation.replace("Home"); // Hvis login er succesfuldt, navigerer til Home-skærmen
       })
       .catch((error) => {
         console.error("Login Error Code:", error.code);
@@ -37,6 +41,7 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
+    // Firebase-funktion til at oprette en ny bruger
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
         alert("User created successfully! You can now log in.");
@@ -48,6 +53,7 @@ export default function LoginScreen({ navigation }) {
       });
   };
 
+  // returnerer brugergrænsefladen
   return (
     <View style={styles.container}>
       <Image source={require('./assets/Learnly.png')} style={styles.logo} />
