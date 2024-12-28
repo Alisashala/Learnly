@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, StyleSheet, Text, TouchableOpacity, Modal} from "react-native";
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import { auth, db } from './firebaseConfig';
 import { collection, addDoc } from "firebase/firestore";
 
