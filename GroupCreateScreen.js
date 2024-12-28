@@ -60,17 +60,17 @@ export default function GroupCreateScreen({ navigation }) {
   // Returnerer brugergrænsefladen
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Opret en ny gruppe</Text>
+      <Text style={styles.title}>Create a New Group</Text>
       {/* Inputfelt til gruppenavn */}
       <TextInput
-        placeholder="Gruppenavn"
+        placeholder="Group Name"
         value={groupName}
         onChangeText={setGroupName}
         style={styles.input}
       />
       {/* Inputfelt til gruppebeskrivelse */}
       <TextInput
-        placeholder="Gruppebeskrivelse"
+        placeholder="Group Description"
         value={groupDescription}
         onChangeText={setGroupDescription}
         style={styles.input}
@@ -78,7 +78,7 @@ export default function GroupCreateScreen({ navigation }) {
       />
       {/* Knap til at oprette en gruppe */}
       <TouchableOpacity style={styles.createButton} onPress={createGroup}>
-        <Text style={styles.createButtonText}>Opret gruppe</Text>
+        <Text style={styles.createButtonText}>Create Group</Text>
       </TouchableOpacity>
 
       {/* Modal der viser, når gruppen er oprettet */}
@@ -89,7 +89,7 @@ export default function GroupCreateScreen({ navigation }) {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Gruppen blev oprettet!</Text>
+            <Text style={styles.modalTitle}>Group Has Been Created!</Text>
             <View style={styles.groupIdContainer}>
               <Text style={styles.groupIdText}>{createdGroupId}</Text>
               {/* Knap til at kopiere gruppe-ID */}
@@ -104,7 +104,7 @@ export default function GroupCreateScreen({ navigation }) {
             </View>
             
             <Text style={styles.instructionText}>
-              Del dette ID med andre, der vil deltage i gruppen.
+            Share this ID with others who want to join the group.
             </Text>
             
             {/* Knapper i modalvinduet */}
@@ -113,14 +113,14 @@ export default function GroupCreateScreen({ navigation }) {
                 style={styles.enterButton} 
                 onPress={handleJoinGroup}
               >
-                <Text style={styles.enterButtonText}>Gå til gruppen</Text>
+                <Text style={styles.enterButtonText}>Go To The Group</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={styles.closeButton} 
                 onPress={() => setIsGroupCreated(false)}
               >
-                <Text style={styles.closeButtonText}>Luk</Text>
+                <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
